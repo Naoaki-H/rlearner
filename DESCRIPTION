@@ -1,4 +1,4 @@
-Package: rlearner
+Package: rlearner2
 Title: R-learner for Heterogeneous Treatment Effect Estimation
 Version: 1.1.0
 Authors@R: c(person("Xinkun", "Nie", email = "xinkun@stanford.edu",role = c("aut", "cre")), person("Alejandro", "Schuler", email = "aschuler@stanford.edu", role = "aut"), person("Stefan", "Wager", email = "swager@stanford.edu", role = "aut"))
