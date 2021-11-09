@@ -30,6 +30,7 @@ rkern = function(x, w, y,
                   k_folds = NULL,
                   p_hat = NULL,
                   m_hat = NULL,
+                  trunctuate = FALSE,
                   b_range = 10^(seq(-3,3,0.5)),
                   lambda_range = 10^(seq(-3,3,0.5))){
 
@@ -43,15 +44,21 @@ rkern = function(x, w, y,
     k_folds = floor(max(3, min(10,length(w)/4)))
   }
   w = as.numeric(w)
-
+  
+  if (trunctuate) {
+    weight = rep(1,length(w))
+  } else{
+    weight = NULL
+  }
+ 
  if (is.null(p_hat)) {
-  p_hat_model = cv_klrs(x, w, weights=NULL, k_folds=k_folds, b_range=b_range,lambda_range=lambda_range)
+  p_hat_model = cv_klrs(x, w, weights=weight, k_folds=k_folds, b_range=b_range,lambda_range=lambda_range)
   p_hat = p_hat_model$fit
  } else {
   p_hat_model = NULL
  }
  if (is.null(m_hat)) {
-  m_hat_model = cv_klrs(x, y, weights=NULL, k_folds=k_folds, b_range=b_range,lambda_range=lambda_range)
+  m_hat_model = cv_klrs(x, y, weights=weight, k_folds=k_folds, b_range=b_range,lambda_range=lambda_range)
   m_hat = m_hat_model$fit
  } else {
   m_hat_model = NULL
