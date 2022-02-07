@@ -126,6 +126,28 @@ cvboost = function(x,
   ret
 }
 
+#' Gradient boosting for regression and classification with cross validation to search for hyper-parameters (implemented with xgboost)
+#'
+#' @param x the input features
+#' @param y the observed response (real valued)
+#' @param weights weights for input if doing weighted regression/classification. If set to NULL, no weights are used
+#' @param k_folds number of folds used in cross validation
+#' @param objective choose from either "reg:squarederror" for regression or "binary:logistic" for logistic regression
+#' @param ntrees_max the maximum number of trees to grow for xgboost
+#' @param num_search_rounds the number of random sampling of hyperparameter combinations for cross validating on xgboost trees
+#' @param print_every_n the number of iterations (in each iteration, a tree is grown) by which the code prints out information
+#' @param early_stopping_rounds the number of rounds the test error stops decreasing by which the cross validation in finding the optimal number of trees stops
+#' @param nthread the number of threads to use. The default is NULL, which uses all available threads. Note that this does not apply to using bayesian optimization to search for hyperparameters.
+#' @param verbose boolean; whether to print statistic
+#'
+#' @return a cvboost object
+#' @export
+cvgbm <- function(object,
+                  newx=NULL,
+                  ...) {
+
+}
+
 #' predict for cvboost
 #'
 #' @param object a cvboost object
