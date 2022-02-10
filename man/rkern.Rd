@@ -11,6 +11,7 @@ rkern(
   k_folds = NULL,
   p_hat = NULL,
   m_hat = NULL,
+  trunctuate = FALSE,
   b_range = 10^(seq(-3, 3, 0.5)),
   lambda_range = 10^(seq(-3, 3, 0.5))
 )
