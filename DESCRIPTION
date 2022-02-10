@@ -14,6 +14,7 @@ Collate:
     'cvkern.R'
     'utils.R'
     'rboost.R'
+    'rboostlgb.R'
     'rkern.R'
     'rlasso.R'
     'sboost.R'
