@@ -142,9 +142,113 @@ cvboost = function(x,
 #'
 #' @return a cvboost object
 #' @export
-cvgbm <- function(object,
-                  newx=NULL,
-                  ...) {
+cvlgb <- function(x,
+                  y,
+                  weights=NULL,
+                  k_folds=NULL,
+                  objective=c("reg:squarederror", "binary:logistic"),
+                  ntrees_max=1000,
+                  num_search_rounds=10,
+                  print_every_n=100,
+                  early_stopping_rounds=10,
+                  nthread=NULL,
+                  verbose=FALSE) {
+  objective = match.arg(objective)
+  if (objective == "reg:squarederror") {
+    objective = "regression"
+  }
+  else if (objective == "binary:logistic") {
+    objective = "binary"
+  }
+  else {
+    stop("objective not defined.")
+  }
+
+  if (verbose) {
+    verbose = 1L
+  }
+  else {
+    verbose = -1L
+  }
+
+  if (is.null(k_folds)) {
+    k_folds = floor(max(3, min(10,length(y)/4)))
+  }
+  if (is.null(weights)) {
+    weights = rep(1, length(y))
+  }
+
+  dtrain <- lightgbm::lgb.Dataset(
+    data = as.matrix(x),
+    label = y,
+    weight = weights
+  )
+
+  best_param = list()
+  best_seednumber = 1234
+  best_loss = Inf
+
+  if (is.null(nthread)){
+    nthread = parallel::detectCores()
+  }
+
+  for (iter in 1:num_search_rounds) {
+    param <- list(objective = objective,
+                  nrounds = ntrees_max,
+                  bagging_fraction = sample(c(0.5, 0.75, 1), 1),
+                  feature_fraction = sample(c(0.6, 0.8, 1), 1),
+                  learning_rate = sample(c(5e-3, 1e-2, 0.015, 0.025, 5e-2, 8e-2, 1e-1, 2e-1), 1),
+                  max_depth = sample(c(3:15), 1),
+                  lambda_l2 = runif(1, 0.0, 0.2),
+                  min_child_weight = sample(1:20, 1),
+                  max_delta_step = sample(0:10, 1),
+                  save_name = "lightgbm.model",
+                  nthread = nthread
+                  )
+
+    seed_number = sample.int(100000, 1)[[1]]
+    set.seed(seed_number)
+    lgb_cv_args = list(data = dtrain,
+                       param = param,
+                       verbose = verbose,
+                       eval_freq = 0L,
+                       early_stopping_rounds = early_stopping_rounds,
+                       init_model = NULL,
+                       callbacks = list(),
+                       nfold = k_folds)
+
+
+    lgb_cvfit <- do.call(lightgbm::lgb.cv, lgb_cv_args)
+
+    min_loss = lgb_cvfit$best_score
+
+    if (min_loss < best_loss) {
+      best_loss = min_loss
+      best_seednumber = seed_number
+      best_param = param
+      best_lgb_cvfit = lgb_cvfit
+    }
+  }
+
+  set.seed(best_seednumber)
+
+  lgb_train_args = list(data = dtrain,
+                        params = best_param,
+                        verbose = -1,
+                        eval_freq = -1,
+                        nrounds = best_lgb_cvfit$best_iter)
+
+  lgb_fit <- do.call(lightgbm::lgb.train, lgb_train_args)
+
+  ret = list(lgb_fit = lgb_fit,
+             best_lgb_cvfit = best_lgb_cvfit,
+             best_seednumber = best_seednumber,
+             best_param = best_param,
+             best_loss = best_loss,
+             best_ntreelimit = best_lgb_cvfit$best_ntreelimit)
+
+  class(ret) <- "cvboost"
+  ret
 
 }
 
