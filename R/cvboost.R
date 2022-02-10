@@ -194,7 +194,6 @@ cvlgb <- function(x,
 
   for (iter in 1:num_search_rounds) {
     param <- list(objective = objective,
-                  nrounds = ntrees_max,
                   bagging_fraction = sample(c(0.5, 0.75, 1), 1),
                   feature_fraction = sample(c(0.6, 0.8, 1), 1),
                   learning_rate = sample(c(5e-3, 1e-2, 0.015, 0.025, 5e-2, 8e-2, 1e-1, 2e-1), 1),
@@ -202,7 +201,6 @@ cvlgb <- function(x,
                   lambda_l2 = runif(1, 0.0, 0.2),
                   min_child_weight = sample(1:20, 1),
                   max_delta_step = sample(0:10, 1),
-                  save_name = "lightgbm.model",
                   nthread = nthread
                   )
 
@@ -210,6 +208,7 @@ cvlgb <- function(x,
     set.seed(seed_number)
     lgb_cv_args = list(data = dtrain,
                        param = param,
+                       nrounds = ntrees_max,
                        verbose = verbose,
                        eval_freq = 0L,
                        early_stopping_rounds = early_stopping_rounds,
